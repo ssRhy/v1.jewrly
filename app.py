@@ -1,10 +1,18 @@
 import requests
 import datetime
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, make_response
 from flask_cors import CORS
+import os
 #flask框架与前端对接
 app = Flask(__name__)
-CORS(app)  # 启用CORS支持
+# 配置CORS以支持跨域请求
+CORS(app, resources={
+    r"/*": {
+        "origins": ["*"],  # 在生产环境中应该限制具体域名
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"]
+    }
+})
 
 # ==================== 基础数据配置 ====================
 TIANGAN_WUXING = {
@@ -272,16 +280,16 @@ def calculate_lucky_numbers(analysis_result: dict) -> list:
     """
     根据八字分析结果计算幸运数字。
     逻辑：
-      - 从“喜用神”字段中提取最弱五行（格式："木(火)"，取括号前部分）
-      - 从“日主”字段中提取日主五行（格式："丙(火)"，取括号内部分）
+      - 从"喜用神"字段中提取最弱五行（格式："木(火)"，取括号前部分）
+      - 从"日主"字段中提取日主五行（格式："丙(火)"，取括号内部分）
       - 利用五行数字映射表组合两部分对应的数字（去重后返回列表）
     """
     try:
-        # 提取最弱五行（取“喜用神”中括号前的部分）
+        # 提取最弱五行（取"喜用神"中括号前的部分）
         xi_shen_str = analysis_result["五行喜忌"]["喜用神"]
         weakest_wuxing = xi_shen_str.split('(')[0]
         
-        # 提取日主五行（取“日主”中括号内的部分）
+        # 提取日主五行（取"日主"中括号内的部分）
         rizhu_str = analysis_result["日主"]
         day_master_wuxing = rizhu_str.split('(')[1].strip(')')
         
@@ -313,7 +321,11 @@ def get_bazi_from_api(name, sex, birth_type, year, month, day, hours, minute):
     }
     
     try:
-        response = requests.post(url, headers=headers, data=data)
+        # 创建一个不使用代理的会话
+        session = requests.Session()
+        session.trust_env = False  # 这会忽略环境变量中的代理设置
+        
+        response = session.post(url, headers=headers, data=data, verify=True)
         response.raise_for_status()
         api_response = response.json()
         
@@ -447,10 +459,28 @@ def choose_daily_activities(analysis_result):
 
 # ==================== Flask 后端接口 ====================
 #即对接文档
-@app.route('/analyze', methods=['POST'])
+@app.route('/analyze', methods=['POST', 'OPTIONS'])
 def analyze_bazi():
+    # 处理预检请求
+    if request.method == 'OPTIONS':
+        response = make_response()
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+        response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+        return response
+
     try:
-        data = request.get_json()
+        # 获取Content-Type
+        content_type = request.headers.get('Content-Type', '')
+        
+        # 根据不同的Content-Type处理请求数据
+        if 'application/json' in content_type:
+            data = request.get_json()
+        elif 'application/x-www-form-urlencoded' in content_type:
+            data = request.form.to_dict()
+        else:
+            return jsonify({'error': '不支持的Content-Type'}), 400
+
         if not data:
             return jsonify({'error': '未接收到数据'}), 400
         
@@ -536,13 +566,24 @@ def analyze_bazi():
                 '今日天干': [today_tiangan, today_dizhi]  # 返回天干地支数组
             }
             
-            return jsonify(result)
+            # 修改响应返回
+            response = make_response(jsonify(result))
+            response.headers['Access-Control-Allow-Origin'] = '*'
+            response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+            response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+            return response
             
         except Exception as e:
-            return jsonify({'error': f'处理数据时出错: {str(e)}'}), 400
+            error_response = make_response(jsonify({'error': f'处理数据时出错: {str(e)}'}), 400)
+            error_response.headers['Access-Control-Allow-Origin'] = '*'
+            return error_response
             
     except Exception as e:
-        return jsonify({'error': f'请求处理失败: {str(e)}'}), 400
-#把主程序入口换成这个
+        error_response = make_response(jsonify({'error': f'请求处理失败: {str(e)}'}), 400)
+        error_response.headers['Access-Control-Allow-Origin'] = '*'
+        return error_response
+
+# 修改主程序入口
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=True)
