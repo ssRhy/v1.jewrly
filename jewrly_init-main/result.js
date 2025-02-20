@@ -87,8 +87,8 @@ function handleAnalysisData(data) {
 
     // 今日干支
     document.getElementById('todayGanzhi').innerHTML = `
-        <p>天干：${data.今日天干}</p>
-        <p>地支：${data.今日地支}</p>
+        <p>天干：${data.今日天干 || '未知'}</p>
+        <p>地支：${data.今日地支 || '未知'}</p>
     `;
 
     // 幸运颜色
