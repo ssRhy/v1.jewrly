@@ -4,8 +4,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 #flask框架与前端对接
 app = Flask(__name__)
-CORS(app)  # 启用CORS支持
-
+CORS(app, resources={r"/*": {"origins": "*"}})  # 允许所有来源的跨域请求
 # ==================== 基础数据配置 ====================
 TIANGAN_WUXING = {
     '甲': '木', '乙': '木', '丙': '火', '丁': '火',
@@ -41,11 +40,11 @@ DIZHI = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '
 
 # ==================== 五行水晶推荐配置 ====================
 crystals_by_wuxing = {
-    "木": ["绿幽灵:促进事业发展与财富增长", "绿发晶:提升活力，增强免疫力，带来积极乐观的心态", "翡翠:调和情绪并创造和谐的环境"],
-    "火": ["红玛瑙：增强活力，提升自信心，带来热情与积极的力量", "红碧玺：有提升创造力，激发灵感，带来丰富的人生体验", "粉水晶：温柔、爱与疗愈，能促进爱情和人际关系"],
-    "土": ["黄水晶：招来财运，提升个人魅力，带来丰盛与富足", "虎眼石：增强自信心，提升决断力，带来清晰的思绪", "茶水晶：象征稳定与安全"],
-    "金": ["白水晶：有效清理能量场中的负面能量，恢复平衡与和谐", "透明水晶：能够放大能量，提升其他水晶的疗愈功效", "白幽灵：清除负面能量，带来内心的平静与祥和"],
-    "水": ["蓝宝石：舒缓情绪，促进内心的平静与宁静", "海蓝宝石：带来平静与明晰", "黑曜石：具有强大的保护作用，能有效抵御负能量"]
+    "金": ["黄水晶", "白水晶", "钛晶", "黄铁矿"],
+    "木": ["绿幽灵", "绿柱石", "橄榄石", "孔雀石"],
+    "水": ["海蓝宝", "月光石", "蓝晶石", "青金石"],
+    "火": ["红纹石", "红玛瑙", "红宝石", "石榴石"],
+    "土": ["虎眼石", "茶晶", "黑曜石", "玛瑙"]
 }
 
 five_element_numbers = {
@@ -166,20 +165,38 @@ def calculate_wuxing_balance(bazi_dict: dict) -> dict:
     """统计天干及地支藏干的五行能量"""
     wuxing_count = {'木': 0, '火': 0, '土': 0, '金': 0, '水': 0}
     
+    print("开始计算五行能量...")  # 调试日志
+    
     # 统计天干五行（权重1）
     for position in ['年柱', '月柱', '日柱', '时柱']:
         gan = bazi_dict[position]['天干']
         wuxing = TIANGAN_WUXING[gan]
         wuxing_count[wuxing] += 1
+        print(f"{position}天干: {gan} -> {wuxing}")  # 调试日志
     
     # 统计地支藏干五行（权重0.5）
     for position in ['年柱', '月柱', '日柱', '时柱']:
         zhi = bazi_dict[position]['地支']
+        print(f"{position}地支: {zhi}, 藏干: {DIZHI_CANGGAN[zhi]}")  # 调试日志
         for gan in DIZHI_CANGGAN[zhi]:
             wuxing = TIANGAN_WUXING[gan]
             wuxing_count[wuxing] += 0.5
-            
-    return wuxing_count
+            print(f"  藏干{gan} -> {wuxing}")  # 调试日志
+    
+    # 计算总分
+    total = sum(wuxing_count.values())
+    print(f"原始五行计数: {wuxing_count}")  # 调试日志
+    print(f"总分: {total}")  # 调试日志
+    
+    # 转换为百分比并确保所有五行都有值
+    wuxing_percentages = {}
+    for wuxing in ['木', '火', '土', '金', '水']:
+        count = wuxing_count.get(wuxing, 0)
+        percentage = round((count * 100) / total, 1) if total > 0 else 0
+        wuxing_percentages[wuxing] = percentage
+    
+    print(f"五行百分比: {wuxing_percentages}")  # 调试日志
+    return wuxing_percentages
 
 # ==================== 计算五行喜忌（喜用神、忌神） ====================
 def determine_xi_ji_shen(wuxing_count: dict, rizhu_wx: str) -> tuple:
@@ -251,21 +268,59 @@ def choose_crystals_based_on_wuxing_deficiency(analysis_result):
     根据八字五行的缺失情况来选择合适的水晶
     """
     try:
-        wuxing_count = analysis_result["五行强弱"]
-        missing_elements = [wuxing for wuxing, count in wuxing_count.items() if count == 0]
+        print("分析结果:", analysis_result)  # 调试信息
+        wuxing_balance = analysis_result.get("五行强弱", {})
+        print("五行强弱:", wuxing_balance)  # 调试信息
+        
+        if not wuxing_balance:
+            print("没有五行强弱数据")  # 调试信息
+            return {"缺失五行": [], "推荐补充水晶": {}}
+        
+        # 计算平均值
+        values = [float(v) for v in wuxing_balance.values()]
+        avg = sum(values) / len(values) if values else 0
+        print(f"五行平均值: {avg}")  # 调试信息
+        
+        # 找出显著低于平均值的五行（低于平均值20%视为偏弱）
+        threshold = avg * 0.8
+        print(f"阈值: {threshold}")  # 调试信息
+        
+        weak_elements = []
+        for wuxing, percentage in wuxing_balance.items():
+            try:
+                value = float(percentage)
+                if value < threshold:
+                    weak_elements.append({
+                        "五行": wuxing,
+                        "比例": f"{value}%",
+                        "分析": f"{wuxing}的能量为{value}%，低于平均水平，建议补充"
+                    })
+                    print(f"发现偏弱五行: {wuxing}, 比例: {value}%")  # 调试信息
+            except (ValueError, TypeError) as e:
+                print(f"处理{wuxing}时出错: {str(e)}")  # 调试信息
+                continue
+        
+        print("偏弱五行:", weak_elements)  # 调试信息
         
         # 根据缺失的五行选择水晶
         crystals_for_missing_elements = {}
-        for missing_element in missing_elements:
-            crystals_for_missing_elements[missing_element] = crystals_by_wuxing.get(missing_element, [])
+        for element in weak_elements:
+            wuxing = element["五行"]
+            crystals = crystals_by_wuxing.get(wuxing, [])
+            if crystals:  # 只有当有推荐的水晶时才添加
+                crystals_for_missing_elements[wuxing] = crystals
+            print(f"为{wuxing}推荐水晶: {crystals}")  # 调试信息
         
-        return {
-            "缺失五行": missing_elements,
+        result = {
+            "缺失五行": weak_elements,
             "推荐补充水晶": crystals_for_missing_elements
         }
+        print("返回结果:", result)  # 调试信息
+        return result
+        
     except Exception as e:
-        return {"error": str(e)}
-
+        print("错误:", str(e))  # 调试信息
+        return {"缺失五行": [], "推荐补充水晶": {}}
 
         # ==================== 幸运数字计算函数 ====================
 def calculate_lucky_numbers(analysis_result: dict) -> list:
@@ -366,7 +421,7 @@ def generate_daily_lucky_color(bazi_list: list, today_tiangan: str, today_dizhi:
     
     # 从分析结果中提取日主及五行喜忌信息
     # 注意：analysis['五行喜忌']['喜用神'] 格式如 "木(火)"
-    wuxing_xi_ji_str = analysis['五行喜忌']['喜用神']  # 例如 "木(火)"
+    wuxing_xi_ji_str = analysis["五行喜忌"]["喜用神"]
     beneficial_element = wuxing_xi_ji_str.split('(')[1].strip(')')
     
     detrimental_str = analysis['五行喜忌']['忌神']
@@ -484,21 +539,25 @@ def analyze_bazi():
             
             # 进行八字分析
             analysis_result = advanced_analyze(bazi_list)
+            print("八字分析结果:", analysis_result)  # 调试日志
             if "error" in analysis_result:
                 return jsonify({'error': analysis_result["error"]}), 400
             
             # 获取水晶推荐
             crystal_recommendations = choose_crystals_based_on_xi_shen(analysis_result)
+            print("喜用神水晶推荐:", crystal_recommendations)  # 调试日志
             if "error" in crystal_recommendations:
                 return jsonify({'error': crystal_recommendations["error"]}), 400
             
             # 获取五行缺失分析
             wuxing_crystal_recommendations = choose_crystals_based_on_wuxing_deficiency(analysis_result)
-            if "error" in wuxing_crystal_recommendations:
-                return jsonify({'error': wuxing_crystal_recommendations["error"]}), 400
+            print("五行缺失分析:", wuxing_crystal_recommendations)  # 调试日志
+            if not wuxing_crystal_recommendations.get('缺失五行'):
+                print("没有发现五行缺失")  # 调试日志
             
             # 计算幸运数字
             lucky_numbers = calculate_lucky_numbers(analysis_result)
+            print("幸运数字:", lucky_numbers)  # 调试日志
 
             # 获取今日干支
             today_tiangan, today_dizhi = get_today_ganzhi()
@@ -509,43 +568,38 @@ def analyze_bazi():
 
             # 计算幸运颜色
             lucky_color_result = generate_daily_lucky_color(bazi_list, today_tiangan, today_dizhi)
+            print("幸运颜色:", lucky_color_result)  # 调试日志
             if "error" in lucky_color_result:
                 return jsonify({'error': lucky_color_result["error"]}), 400
 
             #推荐活动
             activities_recommendation=choose_daily_activities(analysis_result) 
+            print("推荐活动:", activities_recommendation)  # 调试日志
 
-            #今日干支
-            today_tiangan=get_today_ganzhi()
-
-            
             # 合并分析结果
             result = {
-                '八字': ' '.join(bazi_list),
+                '八字': " ".join(bazi_list),
                 '日主': analysis_result.get('日主', ''),
                 '五行强弱': analysis_result.get('五行强弱', {}),
                 '五行喜忌': analysis_result.get('五行喜忌', {}),
-                '喜用神_天干': crystal_recommendations.get('推荐水晶', []),
-                '忌神_天干': analysis_result.get('忌神_天干', []),
-                '五行_水晶': {
-                    '缺失五行': wuxing_crystal_recommendations.get('缺失五行', []),
-                    '推荐补充水晶': wuxing_crystal_recommendations.get('推荐补充水晶', {})
-                },
+                '喜用神_水晶': crystal_recommendations.get('推荐水晶', []),
+                '五行_水晶': wuxing_crystal_recommendations.get('推荐补充水晶', {}),
+                '五行缺失分析': wuxing_crystal_recommendations.get('缺失五行', []),
                 '幸运数字': lucky_numbers,
-                '幸运颜色': {
-                    'color': lucky_color_result['lucky_color'],
-                    'strategy': lucky_color_result['strategy'],
-                },
+                '幸运颜色': lucky_color_result,
                 '推荐活动': activities_recommendation,
                 '今日天干': [today_tiangan, today_dizhi]  # 返回天干地支数组
             }
+            print("最终返回结果:", result)  # 调试日志
             
             return jsonify(result)
             
         except Exception as e:
+            print("处理数据时出错:", str(e))  # 调试日志
             return jsonify({'error': f'处理数据时出错: {str(e)}'}), 400
             
     except Exception as e:
+        print("请求处理失败:", str(e))  # 调试日志
         return jsonify({'error': f'请求处理失败: {str(e)}'}), 400
 #把主程序入口换成这个
 if __name__ == "__main__":

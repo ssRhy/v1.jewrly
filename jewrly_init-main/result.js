@@ -90,29 +90,25 @@ function handleAnalysisData(data) {
     document.getElementById('crystalRecommendations').innerHTML = crystalHtml;
 
     // 五行缺失分析
-    let deficiencyHtml = '';
-    if (data.五行_水晶.缺失五行.length > 0) {
-        deficiencyHtml = `
-            <p>缺失五行: ${data.五行_水晶.缺失五行.join('、')}</p>
+    console.log('五行缺失分析数据:', {
+        缺失分析: data.wuxingDeficiency,
+        水晶推荐: data.crystalRecommendations
+    });
+
+    const wuxingDeficiencyContent = data.wuxingDeficiency && data.wuxingDeficiency.length > 0
+        ? `<div class="deficiency-content">
+            <h4>五行缺失分析</h4>
+            <p>缺失或偏弱五行：${data.wuxingDeficiency.map(wx => `${wx}`).join('、')}</p>
             <div class="crystal-recommendations">
-                ${Object.entries(data.五行_水晶.推荐补充水晶)
-                    .map(([element, crystals]) => `
-                        <div class="element-crystals">
-                            <h4>${element}相关水晶:</h4>
-                            ${crystals.map(crystal => {
-                                const [name, desc] = crystal.split(':');
-                                return `<div class="crystal-item">
-                                    <strong>${name}</strong>${desc ? `: ${desc}` : ''}
-                                </div>`;
-                            }).join('')}
-                        </div>
-                    `).join('')}
+                <h4>推荐水晶：</h4>
+                <ul>
+                    ${data.crystalRecommendations.map(crystal => `<li>${crystal}</li>`).join('')}
+                </ul>
             </div>
-        `;
-    } else {
-        deficiencyHtml = '<p>五行均衡，无明显缺失。</p>';
-    }
-    document.getElementById('wuxingDeficiency').innerHTML = deficiencyHtml;
+           </div>`
+        : '<p>五行较为均衡，无需特别补充。</p>';
+    
+    document.getElementById('wuxingDeficiency').innerHTML = wuxingDeficiencyContent;
 
     // 每日推荐活动
     if (data.推荐活动 && !data.推荐活动.error) {

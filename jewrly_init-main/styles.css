@@ -138,36 +138,90 @@ h2, h3, h4 {
 }
 
 /* 五行缺失分析样式 */
-.wuxing-deficiency p {
-    font-size: 16px;
-    line-height: 1.8;
-    margin: 10px 0;
-    padding: 12px 15px;
-    background: #fff3e0;
+.wuxing-deficiency {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.wuxing-deficiency h3 {
+    color: #444;
+    margin-bottom: 15px;
+    font-size: 1.3em;
+}
+
+.deficiency-content {
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.5);
     border-radius: 8px;
-    color: #e65100;
-    font-weight: bold;
+}
+
+.deficiency-content p {
+    font-size: 1.1em;
+    color: #555;
+    margin-bottom: 15px;
+}
+
+.crystal-recommendations {
+    margin-top: 15px;
+}
+
+.crystal-recommendations h4 {
+    color: #444;
+    margin: 10px 0;
+    font-size: 1.1em;
+}
+
+.crystal-recommendations ul {
+    list-style: none;
+    padding-left: 20px;
+}
+
+.crystal-recommendations li {
+    margin: 8px 0;
+    color: #666;
+    position: relative;
+}
+
+.crystal-recommendations li:before {
+    content: "•";
+    color: #888;
+    position: absolute;
+    left: -15px;
+    top: 0;
 }
 
 .element-crystals {
-    margin: 15px 0;
-    padding: 12px;
-    background: #f5f5f5;
+    margin-bottom: 15px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.5);
     border-radius: 8px;
 }
 
 .element-crystals h4 {
-    color: #424242;
-    margin-bottom: 8px;
-    font-size: 15px;
+    color: #555;
+    margin-bottom: 10px;
+    font-size: 1.1em;
 }
 
-.crystal-item {
-    background: white;
-    padding: 8px 12px;
-    margin: 8px 0;
-    border-radius: 6px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+.element-crystals ul {
+    list-style-type: none;
+    padding-left: 15px;
+}
+
+.element-crystals li {
+    margin: 5px 0;
+    color: #666;
+    position: relative;
+}
+
+.element-crystals li:before {
+    content: "•";
+    color: #888;
+    position: absolute;
+    left: -15px;
 }
 
 /* 五行圆圈样式 */
@@ -400,79 +454,77 @@ button:hover {
 }
 
 /* 五行分析样式 */
-.wuxing-circles {
-    position: relative;
-    width: 200px;
-    height: 250px;
-    margin: 20px auto;
-    font-weight: bold;
+.wuxing-analysis {
+    margin-bottom: 20px;
 }
 
-.wuxing-circle {
-    position: absolute;
-    border-radius: 50%;
+.wuxing-item {
+    margin: 10px 0;
     display: flex;
-    flex-direction: column;
-    justify-content: center;
     align-items: center;
-    color: white;
-    font-weight: bold;
-    font-size: 14px;
-    line-height: 1.2;
-    font-weight: bold;
 }
 
-.wuxing-circle::after {
-    content: attr(data-value);
-    font-size: 13px;
-    margin-top: 2px;
+.wuxing-name {
+    width: 40px;
     font-weight: bold;
+    color: #444;
 }
 
-/* 木 - 顶部 */
-.wuxing-circle.wood {
-    background-color: #4CAF50;
-    width: 60px;
-    height: 60px;
-    left: 70px;
+.wuxing-bar {
+    flex: 1;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-left: 10px;
+}
+
+.wuxing-progress {
+    height: 100%;
+    background: linear-gradient(90deg, #4CAF50 0%, #2196F3 100%);
+    border-radius: 10px;
+    transition: width 0.3s ease;
+}
+
+.weak-elements {
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 8px;
+}
+
+.weak-elements h4 {
+    color: #d32f2f;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+}
+
+.crystal-recommendations {
+    margin-top: 15px;
+}
+
+.crystal-recommendations h4 {
+    color: #1976d2;
+    margin: 10px 0;
+}
+
+.crystal-recommendations ul {
+    list-style: none;
+    padding-left: 20px;
+}
+
+.crystal-recommendations li {
+    margin: 8px 0;
+    color: #666;
+    position: relative;
+}
+
+.crystal-recommendations li:before {
+    content: "•";
+    color: #1976d2;
+    position: absolute;
+    left: -15px;
     top: 0;
-}
-
-/* 水 - 左侧 */
-.wuxing-circle.water {
-    background-color: #2196F3;
-    width: 60px;
-    height: 60px;
-    left: 0;
-    top: 80px;
-   
-}
-
-/* 金 - 左下 */
-.wuxing-circle.metal {
-    background-color: #9E9E9E;
-    width: 60px;
-    height: 60px;
-    left: 20px;
-    top: 150px;
-}
-
-/* 火 - 右侧 */
-.wuxing-circle.fire {
-    background-color: #F44336;
-    width: 60px;
-    height: 60px;
-    right: 0px;
-    top: 80px;
-}
-
-/* 土 - 右下 */
-.wuxing-circle.earth {
-    background-color: #FFC107;
-    width: 60px;
-    height: 60px;
-    right: 20px;
-    top: 150px;
 }
 
 /* 响应式设计 */
@@ -511,4 +563,75 @@ button:hover {
         padding: 20px;
         width: 95%;
     }
+}
+
+/* 移动端滑动样式 */
+.results-container {
+    width: 100%;
+    padding: 20px 0;
+}
+
+.swiper {
+    width: 100%;
+    height: auto;
+}
+
+.swiper-slide {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* 移动端适配 */
+@media screen and (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    .results-grid {
+        display: none; /* 在移动端隐藏原始网格布局 */
+    }
+
+    .swiper {
+        display: block;
+    }
+
+    h1 {
+        font-size: 1.8em;
+        margin: 15px 0;
+    }
+
+    .daily-quote {
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+
+    .quote-text {
+        font-size: 1.1em;
+    }
+
+    .result-card {
+        margin-bottom: 0;
+    }
+
+    .result-card h3 {
+        font-size: 16px;
+    }
+}
+
+/* Swiper分页器样式 */
+.swiper-pagination {
+    position: relative;
+    margin-top: 15px;
+}
+
+.swiper-pagination-bullet {
+    width: 8px;
+    height: 8px;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.swiper-pagination-bullet-active {
+    background: #333;
 }
