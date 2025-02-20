@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         // 请求后台进行八字分析
-        fetch('http://127.0.0.1:5000/analyze', {
+        fetch('http://127.0.0.1:8080/analyze', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

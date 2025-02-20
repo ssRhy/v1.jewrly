@@ -547,6 +547,8 @@ def analyze_bazi():
             
     except Exception as e:
         return jsonify({'error': f'请求处理失败: {str(e)}'}), 400
-#把主程序入口换成这个
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    from waitress import serve
+    print("Server started at http://localhost:8080")
+    serve(app, host="0.0.0.0", port=8080)
