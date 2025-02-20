@@ -12,7 +12,7 @@ body {
     margin: 0;
     padding: 0;
     min-height: 100vh;
-    background: linear-gradient(135deg, #FFE082 0%, #FFB6C1 100%);
+    background: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);
     color: #333;
     line-height: 1.6;
     letter-spacing: 0.5px;
@@ -22,73 +22,256 @@ body {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
+    animation: fadeIn 0.8s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 /* 标题样式 */
 h1 {
     text-align: center;
-    color: #333;
-    font-size: 2.2em;
-    margin: 20px 0;
+    color: #2c3e50;
+    font-size: 2.4em;
+    margin: 30px 0;
     font-weight: 600;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    position: relative;
+    padding-bottom: 15px;
 }
 
-h2, h3, h4 {
-    color: #444;
-    margin-bottom: 15px;
-    font-weight: 500;
+h1::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, #2c3e50 0%, #3498db 100%);
+    border-radius: 2px;
 }
 
 /* 每日名言样式 */
 .daily-quote {
     text-align: center;
-    padding: 20px;
-    margin-bottom: 30px;
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 15px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    padding: 30px;
+    margin: 40px auto;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.daily-quote:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
 }
 
 .quote-text {
-    font-size: 1.2em;
-    color: #555;
-    margin-bottom: 10px;
+    font-size: 1.3em;
+    color: #2c3e50;
+    margin-bottom: 15px;
     font-style: italic;
+    line-height: 1.8;
 }
 
 .quote-author {
-    color: #888;
-    font-size: 0.9em;
+    color: #7f8c8d;
+    font-size: 1em;
+    font-weight: 500;
 }
 
-/* 结果网格布局 */
-.results-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 15px;
-    margin-top: 20px;
+/* 按钮样式 */
+.open-popup-btn {
+    display: block;
+    margin: 30px auto;
+    padding: 15px 35px;
+    font-size: 1.1em;
+    color: #fff;
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
 }
 
-/* 结果卡片通用样式 */
+.open-popup-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(52, 152, 219, 0.4);
+}
+
+.open-popup-btn:active {
+    transform: translateY(1px);
+}
+
+/* 弹出层样式 */
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+.popup-card {
+    background: #fff;
+    padding: 30px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+    animation: slideIn 0.4s ease-out;
+}
+
+@keyframes slideIn {
+    from { transform: translateY(-100px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* 表单样式 */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #2c3e50;
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 1em;
+    transition: all 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    outline: none;
+}
+
+/* Swiper容器样式 */
+.swiper {
+    width: 100%;
+    padding: 20px 0;
+    overflow: hidden;
+}
+
+.swiper-slide {
+    background: transparent;
+}
+
+/* 结果卡片样式 */
 .result-card {
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 15px;
-    padding: 20px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease;
+    background: #fff;
+    border-radius: 20px;
+    padding: 25px;
+    margin: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
 }
 
 .result-card:hover {
-    transform: translateY(-2px);
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
 }
 
 .result-card h3 {
-    color: #333;
-    font-size: 18px;
-    margin-bottom: 15px;
-    padding-bottom: 10px;
+    color: #2c3e50;
+    font-size: 1.4em;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
     border-bottom: 2px solid #f0f0f0;
+    position: relative;
+}
+
+.result-card h3::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 50px;
+    height: 2px;
+    background: #3498db;
+}
+
+/* 分页器样式 */
+.swiper-pagination {
+    position: relative;
+    margin-top: 20px;
+}
+
+.swiper-pagination-bullet {
+    width: 10px;
+    height: 10px;
+    background: #bdc3c7;
+    opacity: 0.5;
+    transition: all 0.3s ease;
+}
+
+.swiper-pagination-bullet-active {
+    opacity: 1;
+    background: #3498db;
+    transform: scale(1.2);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+
+    h1 {
+        font-size: 2em;
+    }
+
+    .daily-quote {
+        padding: 20px;
+        margin: 30px auto;
+    }
+
+    .quote-text {
+        font-size: 1.1em;
+    }
+
+    .popup-card {
+        padding: 20px;
+        width: 95%;
+    }
+
+    .form-group input,
+    .form-group select {
+        padding: 10px;
+    }
+}
+
+/* 动画效果 */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.animate-pulse {
+    animation: pulse 2s infinite;
 }
 
 /* 基本信息样式 */
@@ -224,58 +407,258 @@ h2, h3, h4 {
     left: -15px;
 }
 
-/* 五行圆圈样式 */
-.wuxing-circles {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    justify-items: center;
-    padding: 10px;
+/* 水晶推荐样式 */
+.crystal-section {
+    margin-bottom: 20px;
 }
 
-.wuxing-circle {
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
+.crystal-section h4 {
+    color: #333;
+    margin: 15px 0 10px;
+    padding-bottom: 5px;
+    border-bottom: 2px solid #eee;
+    font-size: 1em;
+}
+
+.crystal-item {
+    margin: 10px 0;
+    padding: 12px 15px;
+    border-radius: 10px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.primary-crystal {
+    background: linear-gradient(135deg, #E3F2FD, #BBDEFB);
+    border-left: 4px solid #1976D2;
+}
+
+.secondary-crystal {
+    background: linear-gradient(135deg, #F3E5F5, #E1BEE7);
+    border-left: 4px solid #7B1FA2;
+}
+
+.crystal-name {
+    font-size: 1.1em;
+    color: #333;
+    margin-bottom: 8px;
+    font-weight: 600;
+    padding-right: 80px; /* 为标签腾出空间 */
+}
+
+.crystal-description {
+    color: #666;
+    font-size: 0.9em;
+    line-height: 1.5;
+    margin-top: 5px;
+}
+
+.crystal-type {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    color: #fff;
+}
+
+.primary-crystal .crystal-type {
+    background-color: #1976D2;
+}
+
+.secondary-crystal .crystal-type {
+    background-color: #7B1FA2;
+}
+
+.crystal-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 幸运色样式 */
+.lucky-color-section {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.color-info {
     display: flex;
     align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: bold;
-    font-size: 1.1em;
-    position: relative;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    gap: 20px;
+    margin-bottom: 15px;
+}
+
+.lucky-color-display {
+    width: 80px;
+    height: 80px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    border: 3px solid white;
     transition: transform 0.2s ease;
 }
 
+.lucky-color-display:hover {
+    transform: scale(1.05);
+}
+
+.color-details {
+    flex: 1;
+}
+
+.color-name {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.color-code-display {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.color-code {
+    font-family: 'Courier New', monospace;
+    font-size: 15px;
+    color: #666;
+    background: #f5f5f5;
+    padding: 4px 10px;
+    border-radius: 6px;
+    display: inline-block;
+}
+
+.color-preview {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.color-strategy {
+    color: #555;
+    line-height: 1.6;
+    margin: 0;
+    padding-top: 12px;
+    border-top: 1px solid #eee;
+    font-size: 14px;
+}
+
+/* 五行分析结果卡片样式 */
+.result-card.wuxing-analysis {
+    position: relative;
+    min-height: 300px;
+    padding: 20px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+/* 五行圆圈容器 */
+.wuxing-circles {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    margin: 50px auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 五行圆圈基础样式 */
+.wuxing-circle {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+/* 五行圆圈位置 */
+.wuxing-circle[data-element="金"] {
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+}
+
+.wuxing-circle[data-element="木"] {
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+}
+
+.wuxing-circle[data-element="水"] {
+    bottom: 0;
+    right: 15%;
+    background: linear-gradient(135deg, #3498db, #2980b9);
+}
+
+.wuxing-circle[data-element="火"] {
+    bottom: 0;
+    left: 15%;
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+}
+
+.wuxing-circle[data-element="土"] {
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    background: linear-gradient(135deg, #f39c12, #d35400);
+}
+
+/* 五行圆圈悬停效果 */
 .wuxing-circle:hover {
     transform: scale(1.1);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+    z-index: 1;
 }
 
-.wuxing-circle::after {
-    content: attr(data-value);
+/* 保持特定位置的圆圈在放大时的位置 */
+.wuxing-circle[data-element="金"]:hover {
+    transform: translateX(-50%) scale(1.1);
+}
+
+.wuxing-circle[data-element="木"]:hover {
+    transform: translateY(-50%) scale(1.1);
+}
+
+.wuxing-circle[data-element="土"]:hover {
+    transform: translateY(-50%) scale(1.1);
+}
+
+/* 五行圆圈百分比显示 */
+.wuxing-circle .percentage {
+    margin-top: 5px;
+    font-size: 12px;
+    opacity: 0.9;
+}
+
+/* 五行连线 */
+.wuxing-circles::before {
+    content: '';
     position: absolute;
-    bottom: -20px;
-    font-size: 0.9em;
-    color: #333;
-    font-weight: normal;
-}
-
-/* 五行颜色 */
-.wuxing-circle.wood { 
-    background: linear-gradient(135deg, #4CAF50, #81C784);
-}
-.wuxing-circle.fire { 
-    background: linear-gradient(135deg, #F44336, #E57373);
-}
-.wuxing-circle.earth { 
-    background: linear-gradient(135deg, #FFC107, #FFD54F);
-}
-.wuxing-circle.metal { 
-    background: linear-gradient(135deg, #9E9E9E, #BDBDBD);
-}
-.wuxing-circle.water { 
-    background: linear-gradient(135deg, #2196F3, #64B5F6);
+    width: 200px;
+    height: 200px;
+    border: 2px dashed rgba(0,0,0,0.1);
+    border-radius: 50%;
+    pointer-events: none;
 }
 
 /* 幸运数字样式 */
@@ -296,23 +679,6 @@ h2, h3, h4 {
 
 .number:hover {
     transform: scale(1.1);
-}
-
-/* 幸运色样式 */
-.lucky-color-display {
-    width: 80px;
-    height: 80px;
-    margin: 0 auto 15px;
-    border-radius: 50%;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-    border: 3px solid white;
-    transition: transform 0.2s ease;
-    font-weight: bold;
-}
-
-.lucky-color-display:hover {
-    transform: scale(1.1);
-    font-weight: bold;
 }
 
 /* 水晶推荐样式 */
@@ -451,80 +817,6 @@ button:hover {
 
 .close-popup:hover {
     color: #666;
-}
-
-/* 五行分析样式 */
-.wuxing-analysis {
-    margin-bottom: 20px;
-}
-
-.wuxing-item {
-    margin: 10px 0;
-    display: flex;
-    align-items: center;
-}
-
-.wuxing-name {
-    width: 40px;
-    font-weight: bold;
-    color: #444;
-}
-
-.wuxing-bar {
-    flex: 1;
-    height: 20px;
-    background: rgba(255, 255, 255, 0.5);
-    border-radius: 10px;
-    overflow: hidden;
-    margin-left: 10px;
-}
-
-.wuxing-progress {
-    height: 100%;
-    background: linear-gradient(90deg, #4CAF50 0%, #2196F3 100%);
-    border-radius: 10px;
-    transition: width 0.3s ease;
-}
-
-.weak-elements {
-    margin-top: 20px;
-    padding: 15px;
-    background: rgba(255, 255, 255, 0.5);
-    border-radius: 8px;
-}
-
-.weak-elements h4 {
-    color: #d32f2f;
-    margin-bottom: 10px;
-    font-size: 1.1em;
-}
-
-.crystal-recommendations {
-    margin-top: 15px;
-}
-
-.crystal-recommendations h4 {
-    color: #1976d2;
-    margin: 10px 0;
-}
-
-.crystal-recommendations ul {
-    list-style: none;
-    padding-left: 20px;
-}
-
-.crystal-recommendations li {
-    margin: 8px 0;
-    color: #666;
-    position: relative;
-}
-
-.crystal-recommendations li:before {
-    content: "•";
-    color: #1976d2;
-    position: absolute;
-    left: -15px;
-    top: 0;
 }
 
 /* 响应式设计 */

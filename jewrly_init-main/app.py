@@ -588,7 +588,8 @@ def analyze_bazi():
                 '幸运数字': lucky_numbers,
                 '幸运颜色': lucky_color_result,
                 '推荐活动': activities_recommendation,
-                '今日天干': [today_tiangan, today_dizhi]  # 返回天干地支数组
+                '今日天干': today_tiangan,  # 分别返回天干和地支
+                '今日地支': today_dizhi
             }
             print("最终返回结果:", result)  # 调试日志
             
@@ -603,4 +604,4 @@ def analyze_bazi():
         return jsonify({'error': f'请求处理失败: {str(e)}'}), 400
 #把主程序入口换成这个
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host='localhost', port=5000, debug=True)

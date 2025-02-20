@@ -29,6 +29,8 @@ function updateDailyQuote() {
 
 // 处理分析结果数据
 function handleAnalysisData(data) {
+    console.log('接收到的数据:', data);
+
     // 基本信息
     document.getElementById('basicInfo').innerHTML = `
         <p>八字: ${data.八字}</p>
@@ -36,82 +38,128 @@ function handleAnalysisData(data) {
     `;
 
     // 五行分析
-    const wuxingElements = {
-        '木': ['wood', '#4CAF50'],
-        '火': ['fire', '#F44336'],
-        '土': ['earth', '#FFC107'],
-        '金': ['metal', '#9E9E9E'],
-        '水': ['water', '#2196F3']
-    };
+    const wuxingContainer = document.getElementById('wuxingAnalysis');
+    if (!wuxingContainer) {
+        console.error('找不到五行分析容器');
+        return;
+    }
     
-    const wuxingHtml = Object.entries(data.五行强弱)
-        .map(([element, value]) => `
-            <div class="wuxing-circle ${wuxingElements[element][0]}" 
-                 data-value="${value.toFixed(1)}">
-                ${element}
-            </div>
-        `).join('');
-    document.getElementById('wuxingAnalysis').innerHTML = wuxingHtml;
+    wuxingContainer.innerHTML = '';
+    
+    // 五行映射
+    const wuxingMap = {
+        '土': { class: 'earth', color: '#FFC107' },
+        '木': { class: 'wood', color: '#4CAF50' },
+        '水': { class: 'water', color: '#2196F3' },
+        '火': { class: 'fire', color: '#F44336' },
+        '金': { class: 'metal', color: '#9E9E9E' }
+    };
+
+    // 从五行强弱数据创建圆圈
+    Object.entries(data.五行强弱 || {}).forEach(([element, value]) => {
+        console.log(`处理五行元素: ${element}, 值: ${value}`); // 添加调试日志
+        
+        const circle = document.createElement('div');
+        circle.className = `wuxing-circle ${wuxingMap[element].class}`;
+        circle.textContent = element;
+        circle.setAttribute('data-value', value.toFixed(1) + '%');
+        
+        // 根据百分比值调整圆圈大小
+        const minSize = 40; // 最小尺寸
+        const maxSize = 80; // 最大尺寸
+        const size = minSize + ((value / 100) * (maxSize - minSize));
+        
+        // 设置样式
+        circle.style.width = `${size}px`;
+        circle.style.height = `${size}px`;
+        circle.style.backgroundColor = wuxingMap[element].color;
+        
+        console.log(`创建圆圈: ${element}, 大小: ${size}px, 值: ${value}%`); // 添加调试日志
+        wuxingContainer.appendChild(circle);
+    });
 
     // 五行喜忌
     document.getElementById('wuxingLikes').innerHTML = `
-        <p>喜用神: ${data.五行喜忌.喜用神}</p>
-        <p>忌神: ${data.五行喜忌.忌神}</p>
+        <p>喜用神: ${data.五行喜忌.喜用神 || ''}</p>
+        <p>忌神: ${data.五行喜忌.忌神 || ''}</p>
+        ${data.五行喜忌.日主 ? `<p>日主: ${data.五行喜忌.日主}</p>` : ''}
     `;
 
     // 今日干支
-    if (data.今日天干) {
-        document.getElementById('todayGanzhi').innerHTML = `
-            <p>天干：${data.今日天干[0] || '未知'}</p>
-            <p>地支：${data.今日天干[1] || '未知'}</p>
-        `;
-    }
-
-    // 幸运数字
-    const luckyNumbersHtml = data.幸运数字
-        .map(num => `<span class="number">${num}</span>`)
-        .join('');
-    document.getElementById('luckyNumbers').innerHTML = luckyNumbersHtml;
-
-    // 今日幸运色
-    document.getElementById('luckyColor').innerHTML = `
-        <div class="lucky-color-display" style="background-color: ${data.幸运颜色.color}"></div>
-        <p class="color-strategy">${data.幸运颜色.strategy}</p>
+    document.getElementById('todayGanzhi').innerHTML = `
+        <p>天干：${data.今日天干}</p>
+        <p>地支：${data.今日地支}</p>
     `;
 
+    // 幸运颜色
+    const luckyColorData = data.幸运颜色;
+    const colorDisplay = document.getElementById('luckyColor');
+    
+    // 创建颜色显示元素
+    const colorHtml = `
+        <div class="lucky-color-section">
+            <div class="color-info">
+                <div class="lucky-color-display" style="background-color: ${luckyColorData.lucky_color}"></div>
+                <div class="color-details">
+                    <span class="color-name">今日幸运色</span>
+                    <div class="color-code-display">
+                        <span class="color-code">${luckyColorData.lucky_color}</span>
+                        <div class="color-preview" style="background-color: ${luckyColorData.lucky_color}"></div>
+                    </div>
+                </div>
+            </div>
+            <p class="color-strategy">${luckyColorData.strategy}</p>
+        </div>
+    `;
+    
+    colorDisplay.innerHTML = colorHtml;
+
     // 水晶推荐
-    const crystalHtml = data.喜用神_天干
-        .map(crystal => {
-            const [name, description] = crystal.split(':');
-            return `<div class="crystal-item">
-                <strong>${name}</strong>${description ? `: ${description}` : ''}
-            </div>`;
-        }).join('');
-    document.getElementById('crystalRecommendations').innerHTML = crystalHtml;
+    const crystalHtml = [];
+    
+    // 添加喜用神水晶
+    if (data.喜用神_水晶 && Array.isArray(data.喜用神_水晶)) {
+        crystalHtml.push('<div class="crystal-section"><h4>喜用神水晶</h4>');
+        data.喜用神_水晶.forEach(crystal => {
+            crystalHtml.push(`
+                <div class="crystal-item primary-crystal">
+                    <h4 class="crystal-name">${crystal}</h4>
+                    <span class="crystal-type">喜用神</span>
+                </div>
+            `);
+        });
+        crystalHtml.push('</div>');
+    }
+
+    // 添加五行补充水晶
+    if (data.五行_水晶) {
+        crystalHtml.push('<div class="crystal-section"><h4>五行补充水晶</h4>');
+        Object.entries(data.五行_水晶).forEach(([element, crystals]) => {
+            crystals.forEach(crystal => {
+                crystalHtml.push(`
+                    <div class="crystal-item secondary-crystal">
+                        <h4 class="crystal-name">${crystal}</h4>
+                        <p class="crystal-description">补充${element}五行</p>
+                        <span class="crystal-type">五行补充</span>
+                    </div>
+                `);
+            });
+        });
+        crystalHtml.push('</div>');
+    }
+
+    document.getElementById('crystalRecommendations').innerHTML = crystalHtml.join('');
 
     // 五行缺失分析
-    console.log('五行缺失分析数据:', {
-        缺失分析: data.wuxingDeficiency,
-        水晶推荐: data.crystalRecommendations
-    });
-
-    const wuxingDeficiencyContent = data.wuxingDeficiency && data.wuxingDeficiency.length > 0
-        ? `<div class="deficiency-content">
-            <h4>五行缺失分析</h4>
-            <p>缺失或偏弱五行：${data.wuxingDeficiency.map(wx => `${wx}`).join('、')}</p>
-            <div class="crystal-recommendations">
-                <h4>推荐水晶：</h4>
-                <ul>
-                    ${data.crystalRecommendations.map(crystal => `<li>${crystal}</li>`).join('')}
-                </ul>
-            </div>
-           </div>`
-        : '<p>五行较为均衡，无需特别补充。</p>';
-    
+    const wuxingDeficiencyContent = `
+        <div class="deficiency-content">
+            ${data.五行缺失分析.map(item => `<p>${JSON.stringify(item)}</p>`).join('')}
+        </div>
+    `;
     document.getElementById('wuxingDeficiency').innerHTML = wuxingDeficiencyContent;
 
     // 每日推荐活动
-    if (data.推荐活动 && !data.推荐活动.error) {
+    if (data.推荐活动) {
         document.getElementById('dailyActivities').innerHTML = `
             <div class="activities-section">
                 <h4>基于${data.推荐活动.喜用神}五行的推荐活动：</h4>
@@ -120,14 +168,6 @@ function handleAnalysisData(data) {
                         `<li class="activity-item">${activity}</li>`
                     ).join('')}
                 </ul>
-                ${data.推荐活动.五行缺失活动.length > 0 ? `
-                    <h4>五行平衡补充活动：</h4>
-                    <ul class="activity-list">
-                        ${data.推荐活动.五行缺失活动.map(activity => 
-                            `<li class="activity-item">${activity}</li>`
-                        ).join('')}
-                    </ul>
-                ` : ''}
             </div>
         `;
     }
