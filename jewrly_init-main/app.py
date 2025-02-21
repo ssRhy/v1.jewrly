@@ -245,26 +245,66 @@ def choose_crystals_based_on_xi_shen(analysis_result):
     except KeyError as e:
         return {"error": "分析结果不完整，无法选择水晶"}
 
+
         # ==================== 根据五行缺失情况选择水晶 ====================
 def choose_crystals_based_on_wuxing_deficiency(analysis_result):
     """
     根据八字五行的缺失情况来选择合适的水晶
     """
     try:
-        wuxing_count = analysis_result["五行强弱"]
-        missing_elements = [wuxing for wuxing, count in wuxing_count.items() if count == 0]
+        print("分析结果:", analysis_result)  # 调试信息
+        wuxing_balance = analysis_result.get("五行强弱", {})
+        print("五行强弱:", wuxing_balance)  # 调试信息
+        
+        if not wuxing_balance:
+            print("没有五行强弱数据")  # 调试信息
+            return {"缺失五行": [], "推荐补充水晶": {}}
+        
+        # 计算平均值
+        values = [float(v) for v in wuxing_balance.values()]
+        avg = sum(values) / len(values) if values else 0
+        print(f"五行平均值: {avg}")  # 调试信息
+        
+        # 找出显著低于平均值的五行（低于平均值20%视为偏弱）
+        threshold = avg * 0.8
+        print(f"阈值: {threshold}")  # 调试信息
+        
+        weak_elements = []
+        for wuxing, percentage in wuxing_balance.items():
+            try:
+                value = float(percentage)
+                if value < threshold:
+                    weak_elements.append({
+                        "五行": wuxing,
+                        "比例": f"{value}%",
+                        "分析": f"{wuxing}的能量为{value}%，低于平均水平，建议补充"
+                    })
+                    print(f"发现偏弱五行: {wuxing}, 比例: {value}%")  # 调试信息
+            except (ValueError, TypeError) as e:
+                print(f"处理{wuxing}时出错: {str(e)}")  # 调试信息
+                continue
+        
+        print("偏弱五行:", weak_elements)  # 调试信息
         
         # 根据缺失的五行选择水晶
         crystals_for_missing_elements = {}
-        for missing_element in missing_elements:
-            crystals_for_missing_elements[missing_element] = crystals_by_wuxing.get(missing_element, [])
+        for element in weak_elements:
+            wuxing = element["五行"]
+            crystals = crystals_by_wuxing.get(wuxing, [])
+            if crystals:  # 只有当有推荐的水晶时才添加
+                crystals_for_missing_elements[wuxing] = crystals
+            print(f"为{wuxing}推荐水晶: {crystals}")  # 调试信息
         
-        return {
-            "缺失五行": missing_elements,
+        result = {
+            "缺失五行": weak_elements,
             "推荐补充水晶": crystals_for_missing_elements
         }
+        print("返回结果:", result)  # 调试信息
+        return result
+        
     except Exception as e:
-        return {"error": str(e)}
+        print("错误:", str(e))  # 调试信息
+        return {"缺失五行": [], "推荐补充水晶": {}}
 
 
         # ==================== 幸运数字计算函数 ====================
@@ -298,7 +338,7 @@ def get_bazi_from_api(name, sex, birth_type, year, month, day, hours, minute):
     """调用外部API获取用户八字数据"""
     url = 'https://api.yuanfenju.com/index.php/v1/Bazi/paipan'
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-    API_KEY = 'ZexGJR4TIAWMq1MA7PlXZgWy6'
+    API_KEY = '4Up73Pr86QXSWnqGbV5Q0TWBd'
     
     data = {
         'api_key': API_KEY,
@@ -492,10 +532,11 @@ def analyze_bazi():
             if "error" in crystal_recommendations:
                 return jsonify({'error': crystal_recommendations["error"]}), 400
             
-            # 获取五行缺失分析
+          # 获取五行缺失分析
             wuxing_crystal_recommendations = choose_crystals_based_on_wuxing_deficiency(analysis_result)
-            if "error" in wuxing_crystal_recommendations:
-                return jsonify({'error': wuxing_crystal_recommendations["error"]}), 400
+            print("五行缺失分析:", wuxing_crystal_recommendations)  # 调试日志
+            if not wuxing_crystal_recommendations.get('缺失五行'):
+                print("没有发现五行缺失")  # 调试日志
             
             # 计算幸运数字
             lucky_numbers = calculate_lucky_numbers(analysis_result)

@@ -91,24 +91,30 @@ function handleAnalysisData(data) {
 
     // 五行缺失分析
     let deficiencyHtml = '';
-    if (data.五行_水晶.缺失五行.length > 0) {
-        deficiencyHtml = `
-            <p>缺失五行: ${data.五行_水晶.缺失五行.join('、')}</p>
-            <div class="crystal-recommendations">
-                ${Object.entries(data.五行_水晶.推荐补充水晶)
-                    .map(([element, crystals]) => `
-                        <div class="element-crystals">
-                            <h4>${element}相关水晶:</h4>
-                            ${crystals.map(crystal => {
-                                const [name, desc] = crystal.split(':');
-                                return `<div class="crystal-item">
-                                    <strong>${name}</strong>${desc ? `: ${desc}` : ''}
-                                </div>`;
-                            }).join('')}
-                        </div>
-                    `).join('')}
+    if (data.五行_水晶 && data.五行_水晶.缺失五行 && data.五行_水晶.缺失五行.length > 0) {
+        deficiencyHtml = data.五行_水晶.缺失五行.map(item => `
+            <div class="deficiency-item">
+                <p>五行: ${item.五行}</p>
+                <p>比例: ${item.比例}</p>
+                <p>分析: ${item.分析}</p>
             </div>
-        `;
+        `).join('');
+        
+        // 如果有推荐补充水晶，也显示出来
+        if (data.五行_水晶.推荐补充水晶) {
+            deficiencyHtml += '<div class="crystal-recommendations">';
+            for (const [element, crystals] of Object.entries(data.五行_水晶.推荐补充水晶)) {
+                deficiencyHtml += `
+                    <div class="element-crystals">
+                        <h4>${element}相关水晶:</h4>
+                        <ul>
+                            ${crystals.map(crystal => `<li>${crystal}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+            deficiencyHtml += '</div>';
+        }
     } else {
         deficiencyHtml = '<p>五行均衡，无明显缺失。</p>';
     }
